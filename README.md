@@ -15,7 +15,7 @@ Connor McKay - c.mckay@northeastern.edu
 
 Curt Savoie - c.savoie@northeastern.edu
 
-[stackoverflow](stackoverflow.com) for programming help
+[stackoverflow](https://stackoverflow.com) for programming help
 
 [r-documentation](https://www.rdocumentation.org/) for online docs
 
