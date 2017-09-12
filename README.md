@@ -8,6 +8,8 @@ Textbook - [R for Data Science]()
 
 Instructions for installing R and Rstudio can be found in the `installing_r/` directory.
 
+It is highly recommended, but absolutely not required, that you both setup a github profile and [learn some very simple git](https://try.github.io/levels/1/challenges/1) commands. This will help build a place where you can host your work and strengthen your resume should you be interested in going into data science/analytics.
+
 ### Getting help
 Connor McKay - c.mckay@northeastern.edu
 
