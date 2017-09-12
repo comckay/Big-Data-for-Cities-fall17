@@ -3,15 +3,20 @@
 ## Important links, info, and documents
 
 [Syllabus](https://docs.google.com/document/d/1ExwtJAuy5prxz5vwfYboIybRVd7JXVOzVDsbiOGpyyU/edit?usp=sharing)
+
 Textbook - [R for Data Science]()
+
 Instructions for installing R and Rstudio can be found in the `installing_r/` directory.
 
 ### Getting help
 Connor McKay - c.mckay@northeastern.edu
+
 Curt Savoie - c.savoie@northeastern.edu
 
 [stackoverflow](stackoverflow.com) for programming help
+
 [r-documentation](https://www.rdocumentation.org/) for online docs
+
 `?package_name` or `?function_name` within R sessions for in-R docs
 
 ### Homework
