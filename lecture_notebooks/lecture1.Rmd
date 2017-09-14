@@ -19,6 +19,7 @@ Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by press
 Notebooks make it easy to explore our data and present it to end consumers all in one user-friendly package. We can view tibbles and dataframes in many ways:
 ```{r} 
 cars
+iris
 head(cars)
 tail(cars)  # not really all that useful...
 ```
@@ -30,6 +31,8 @@ Base R provides a number of ways to get a handle on some data we have to work wi
 ```{r}
 summary(cars)
 
+x <- tibble::tibble(cars$speed)
+
 iris
 summary(iris)
 ```
@@ -37,6 +40,7 @@ summary(iris)
 Looking at just one column of a data frame can be done with the `$` operator
 ```{r}
 iris$Species
+iris$Sepal.Length
 ```
 
 ## R data types
@@ -112,8 +116,7 @@ T | T
 Factors in R represent categorical data, or data which exist in a finite set of categories or levels. A good example is a column indicating which neighborhood a 311 complaint belongs to. We will see more about factors as we learn about vectors and other containers for our data. 
 
 ```{r}
-x = as.factor("Allston")
-
+x <- as.factor(c("Allston", "Boston"))
 x
 ```
 
@@ -121,7 +124,7 @@ x
 Character data is textual data which does not fall into a finite set of categories, such as free text descriptions, names, etc.
 
 ```{r}
-y <- "This is some character data"
+y <- c("This is some character data", "this is also character")
 
 y
 ```
@@ -131,8 +134,7 @@ Notice the lack of information on the levels.
 Dates are notoriously difficult, in any programming language. [Timezones](https://imgs.xkcd.com/comics/supervillain_plan_2x.png) are another story themselves. Fortunately we have a wonderful package `lubridate` which takes a lot of the headache out of working with dates in R. 
 
 ```{r}
-install.packages("tidyverse")
-install.packages("lubridate")
+library(tidyverse)
 library(lubridate)
 
 # parsing dates
@@ -157,6 +159,13 @@ One of the most simple functions in R is the `c()` or concatenate function. All 
 nhoods <- c("allston", "east boston", "downtown")
 nhoods
 
+square_it <- function(int) {
+  return_val = int ** 2
+  return(return_val)
+}
+
+square_it(2)
+
 c("dorchester", nhoods)
 
 c(1:10, 11, 42)
@@ -166,7 +175,7 @@ c(1:10, 11, 42)
 We often want to work with more than one instance of a thing and keeping track of hundreds or thousands of variables would be nearly impossible. For this we have vectors. Vectors allow us to stick many instances of some data into a single thing represented by a single variable name.
 
 ```{r}
-shopping_list <- c("milk", "bread", "cheese", "apples")
+shopping_list <-c("milk", "bread", "cheese", "apples")
 
 shopping_list
 ```
@@ -180,11 +189,37 @@ list_of_numbers
 long_shopping_list <- c(rep("milk", 4) , "bread", rep("cheese", 2), "apples")
 long_shopping_list
 
-date_vector <- seq(ymd("2011-12-30"), ymd("2012-01-10"), by = "days")
+date_vector <- seq(ymd("2011-12-30"),ymd("2012-01-10"), by = "days")
 date_vector
 
 c(rep(T, 5), rep(F, 10))
 ```
+
+```{r}
+iris
+
+summary(iris)
+
+mean(iris$Sepal.Length)
+min(iris$Sepal.Length)
+```
+
+```{r}
+library(ggplot2)
+
+x <- readr::read_csv('https://data.boston.gov/dataset/8048697b-ad64-4bfc-b090-ee00169f2323/resource/2968e2c0-d479-49ba-a884-4ef523ada3c0/download/311.csv', progress = F)
+
+
+plt <- ggplot(x, aes(x = floor_date(open_dt, "day"))) +
+  geom_bar() +
+  ggtitle("311 Cases by Day") +
+  theme_bw() +
+  xlab("Date Created") +
+  ylab("Count of Cases")
+
+plotly::ggplotly(plt)
+```
+
 
 ## Saving
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file).
