@@ -1,0 +1,146 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Getting Data
+To get data for the course we need to be added to the class group within [dataverse](https://dataverse.harvard.edu/dataverse/SSPUA5262). Within the group you will see a series of data sets with additional docs. It's recommended that you download all and place the data in a folder called `data/` and the docs in a folder called `docs` you should place these folders in the directory which is holding your homework and lecture folders. This will make importing the data very easy and keeping the docs, code, and data all together.
+
+Here is my directory structure to help understand:
+```
+--Big-Data-for-Cities-fall17/
+  |-- data/
+  |-- docs/
+  |-- installing_r/
+  |-- lecture_notebooks/
+  |-- homework/
+```
+```{r}
+library(tidyverse)
+
+read_csv("../data/PADCross.CBG.2017.csv")
+
+# some of our data does not use commas as a delimiter
+read_delim("../data/sensor_data_environment-MT.tsv", delim = "\t")
+```
+
+Remember to use the `<-` operator to assign these results!
+```{r}
+sensor_data <- read_delim("../data/sensor_data_environment-MT.tsv", delim = "\t")
+```
+
+## Data transform
+Our data will pretty much never be in the shape we need to generate or answer questions when we first read it into R. This makes "data wrangling" or "munging" very important. In fact, many people who work with data cite spending anywhere from 70-90% of their time cleaning data! So let's learn how we can do this easily, quickly, and in a reproducible manner. 
+
+The `dplyr` package provides a number of helpful ways to transform data and it will be the main thing we learn today. `dplyr` has a number of functions available to us, the most important being `filter`, `group_by`, `summarise`, `arrange`, `mutate`, and `select`
+
+### `filter`
+
+```{r}
+# let's see what kinds of sensors we have
+table(sensor_data$sensor)
+
+filter(.data = sensor_data, sensor == "O2")
+
+o2_sensors <- filter(.data = sensor_data, sensor == "O2")
+```
+
+We can do more complex filtering operations:
+```{r}
+filter(sensor_data, sensor == "O2", value > .6)  # same as &&
+filter(sensor_data, sensor == "O2" || value > .6)
+filter(sensor_data, hour > 20 & minute != 20)
+```
+
+You can think of filter as building a `keep` column hidden from us as programmers and when that column is `TRUE` the data is returned, otherwise it's filtered out:
+
+```{r}
+sensor_data$keep <- sensor_data$sensor == "O2"
+
+table(sensor_data$keep)
+
+# nice shorthand for booleans
+filter(sensor_data, keep)
+
+sensor_data$keep <- sensor_data$sensor == "O2" | sensor_data$value > 1.6
+
+table(sensor_data$keep)
+
+# nice shorthand for booleans
+filter(sensor_data, keep)
+```
+
+This can be helpful for debugging purposes if you are having trouble with your filter statements.
+
+### `group_by` and `summarise`
+
+These two make sense together and are very abstract separately so we'll deal with them side-by-side. The `group_by` operation does exactly what it sounds like: it groups data frames according to certain categorical vectors. These vectors can be either `factor` or `character` and `group_by` will group according to any groups found within the vector. `group_by` returns grouped data frames. **Beware** grouped data.frames can do all sorts of funny things if you aren't aware of it's state. 
+
+`summarise` takes in grouped data frames and produces summaries, or applies functions, along the groups. Let's look at some examples
+
+```{r}
+grouped_sensor_data <- group_by(sensor_data, sensor)
+
+grouped_sensor_data
+
+class(grouped_sensor_data)
+```
+
+now let's take a look at group means
+```{r}
+summarise(grouped_sensor_data, avg_values = mean(value))
+```
+
+Notice how we can name our new columns to be the results of a function we apply. We can do this in many ways producing many group summaries
+
+```{r}
+summarise(grouped_sensor_data, avg_values = mean(value), median_value = median(value))
+```
+
+We can group by multiple things too
+
+```{r}
+grouped_sensor_data <- group_by(sensor_data, sensor, hour)
+summarise(grouped_sensor_data, avg_values = mean(value), median_value = median(value), variance_value = var(value))
+```
+
+### `arrange`
+`arrange` is a very simple function in that it simply arranges data frames according to a column or set of columns. `arrange` sorts data from lowest to highest, we reverse this with the `desc` function.
+```{r}
+arrange(sensor_data, value)
+arrange(sensor_data, desc(value))
+```
+
+### `mutate`
+`mutate` adds another vector to a data frame, this vector can be some repeated value or computed from other data you have in your data frame or session.
+
+```{r}
+mutate(sensor_data, residual = value - lowessvals)
+```
+
+we can do this across groups as well
+
+```{r}
+grouped_sensor_data <- group_by(sensor_data, sensor)
+
+mutate(grouped_sensor_data, deviance_from_mean = mean(value) - value)
+```
+
+### `select`
+`select` allows us to select only certain columns from the data frame to be passed to other functions on down the line. 
+
+```{r}
+sensor_data
+
+select(sensor_data, id, sensor, day_flg)
+```
+
+## Putting it all together
+Remembering from your readings and other examples, the `%>%` or "pipe" helps  us chain sequences of these commands together so we don't have to assign intermediate representations to variables we will either overwrite or forget about. When we use the pipe we don't need to supply the data as the first argument, it's implied.
+
+```{r}
+sensor_data %>%
+  group_by(sensor) %>%
+  filter(hour == 1) %>%
+  summarise(mean_value = mean(value))
+```
