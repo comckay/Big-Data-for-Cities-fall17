@@ -1,0 +1,54 @@
+---
+title: "BDfC - HW 1"
+output: html_notebook
+---
+
+This will be your first homework! The homeworks will all be hosted on the class github in the `homework/` directory. The homeworks will all be R notebooks with sections describing the task and code chunks for you to fill in in order to complete the task. First, you should ensure you have all the data from the dataverse downloaded. It's recommended that you organize your files to be a mirror of the class github plus a folder for data and a folder for docs. You can see the recommended folder structure in the notebook for lecture 2. 
+
+Let's get started!
+
+## Reading in data 
+In this seciton I will be asking you to do some simple reading of the datasets we have been provided as part of this course. First, read in the data called `aggregatedata-final.csv` using the `readr` package in the tidyverse. Assign it to a variable called `agg_sensor_data`
+
+```{r}
+```
+
+Okay, now read in `sensor_data_city-MT.tab` using `readr` and assign it to a variable called `sensor_data_MT`
+
+```{r}
+```
+
+Read in the previous data set and set all columns to character. This is a helpful trick if your data is very problematic. Don't assign it to anything though.
+
+```{r}
+```
+
+## Data transform
+Okay now we are going to move into transforming your data. 
+
+Using `sensor_data_MT` create a data summary data frame, using only dplyr(`group_by`, `summarise`, `filter`, `arrange`, `select`, `mutate`). This summary table should report the variance, mean, and median for each sensor. Assign this to a variable called `sensor_summary`. Ensure you print the data frame so it shows up in your notebook.
+
+```{r}
+
+```
+
+Now count the number of records in `agg_sensor_data` are recorded for the daytime, according to the `day_flg` vector, and how many readings are recorded for the night. Remove morning observations.
+```{r}
+```
+
+Create a new column in `sensor_data_MT` which is the `timestamp` vector cast as a vector of class date instead of character. You will need to use `lubridate` for this.
+
+```{r}
+```
+
+Using `sensor_data_MT` answer the following: During which hour(s) did sensor GP_HUM with an `id_wasp` value of city2 receive the highest reading for `value`?
+```{r}
+```
+
+What is the mean, variance, standard deviation, median, max, and min for each `sensor` during each time period in `day_flg`?
+```{r}
+```
+
+Show the previous data frame with only entries which were the highest mean value for a given `sensor`. Show a second dataframe, again built off the last, which shows only entries which got the smallest mean value for each `day_flg`.
+```{r}
+```
