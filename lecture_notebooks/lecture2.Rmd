@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Big Data for Cities - Fall 2017 Lecture 2"
 output: html_notebook
 ---
 
