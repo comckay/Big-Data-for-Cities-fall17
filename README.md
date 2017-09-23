@@ -26,6 +26,13 @@ All homework notebooks will be "handed out" here, they can be found in the `home
 
 Homework will help ensure you build the skills you need to complete your final project. They are meant to lightly reinforce the coding examples you will see in each week's class as well as within each week's reading.
 
+### Cheatsheets
+[Data Import](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-import-cheatsheet.pdf)
+[Data Transformation (dplyr)](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf)
+[R Markdown](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rmarkdown-cheatsheet-2.0.pdf)
+[Data Viz](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/ggplot2-cheatsheet-2.1.pdf)
+[R studio General](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rstudio-IDE-cheatsheet.pdf)
+
 ### Reading
 The course textbook is (the online, free, and excellent) [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickam.
 
