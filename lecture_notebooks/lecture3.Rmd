@@ -198,7 +198,11 @@ ggplot(footage_valuation, aes(x = sq_feet, y = declared_valuation)) +
 
 
 lm(data = footage_valuation, formula = declared_valuation ~ sq_feet) %>%
-  broom::tidy(.) 
+{
+  print(summary(.))
+  return(broom::tidy(.))
+}
+  
 
 ```
 
