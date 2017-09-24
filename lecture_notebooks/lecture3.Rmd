@@ -190,6 +190,9 @@ footage_valuation <- permit_records %>%
 
 ggplot(footage_valuation, aes(x = sq_feet, y = declared_valuation)) +
   geom_point() +
+  # stat_density2d(aes(alpha=..level.., fill=..level..), size=2,
+  #       bins=1000, geom="polygon") +
+  # geom_density_2d(bins = 15) +
   geom_smooth(method = "lm", formula = y ~ x) +
   xlab("log(square footage)") +
   ylab("log(declared valuation)") +
