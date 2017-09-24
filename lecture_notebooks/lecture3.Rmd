@@ -153,22 +153,54 @@ Visualizing data is a key part of generating hypotheses and validating data, mod
 
 The gg in ggplot refers to the "grammar of graphics". From our textbook: "The grammar of graphics is based on the insight that you can uniquely describe any plot as a combination of a dataset, a geom, a set of mappings, a stat, a position adjustment, a coordinate system, and a faceting scheme."
 
-Let's dive in and start making some plots layer by layer
+Let's dive in and start making some plots layer by layer. First we declare our base mapping and dataset with the `ggplot()` function.
+
+```{r}
+ggplot(permit_records, aes(x = sq_feet, y = declared_valuation))
+```
+
+We then need to to tell ggplot how to visualize our data via a geometry layer which starts with `geom_`. We layer ggplot layers together with the `+` sign, much to everyone's chagrin. 
+
+```{r}
+ggplot(permit_records, aes(x = sq_feet, y = declared_valuation)) +
+  geom_point()
+```
+
+We can see some huge outliers are causing some trouble. One option is taking the log of some numeric vector with outliers. 
+
+```{r}
+install.packages("DescTools")
+library(DescTools)
+
+ggplot(permit_records, aes(x = log(sq_feet), y = log(declared_valuation))) +
+  geom_point()
+```
+
+ggplot gives us means to to start exploring our hypotheses no matter how simple or complex. Let's do a little transformation and vizualization to look at this relationship
+
+```{r}
+safe_log <- function(x) {
+  return(ifelse(x == 0, 0, log(x)))
+}
+
+footage_valuation <- permit_records %>%
+  select(sq_feet, declared_valuation) %>%
+  map_df(safe_log) %>%
+  filter_all(all_vars(. > 0))
+
+ggplot(footage_valuation, aes(x = sq_feet, y = declared_valuation)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  xlab("log(square footage)") +
+  ylab("log(declared valuation)") +
+  ggtitle("Log-Log, Declared valuation and square footage - Boston Permits") +
+  theme_bw() 
 
 
+lm(data = footage_valuation, formula = declared_valuation ~ sq_feet) %>%
+  broom::tidy(.) 
 
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 
