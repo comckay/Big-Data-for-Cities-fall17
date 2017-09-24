@@ -1,0 +1,178 @@
+---
+title: "BDfC - Lecture 3"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+permit_records <- read_csv("../data/Permits.Records.2017.csv")
+
+# lower case the col names so they are more standard...
+names(permit_records) <- tolower(names(permit_records))
+permit_records
+```
+
+This weeks reading and homework will be focusing on functions, viz, pipes, and tidy data. Let's get started!
+
+## Functions
+Functions appeal to the DRY principle in programming. DRY stands for "Don't Repeat Yourself" and in general is useful to follow because of the potential for error if code is duplicated in multiple places (and even potentially hidden across files). For example if we wanted to [standardize](https://en.wikipedia.org/wiki/Feature_scaling) some data we might do something like this:
+```{r}
+permit_records$sq_feet_stdz <- permit_records$sq_feet - mean(permit_records$sq_feet) / sd(permit_records$sq_feet)
+```
+
+This is fine if we only want to do this once but if we have to do this over and over we open ourselves up to 2 things in particular 1) lots of work to adjust in the future and 2) potential for error in one or more of these copy paste jobs. For example if we want to standardize a new vector we would have to do something like:
+```{r}
+# spot the error
+permit_records$declared_val_stdz <- permit_records$declared_valuation - mean(permit_records$declared_valuation) / sd(permit_records$sq_feet)
+```
+we had to retype the name a few times and certainly opened ourselves up to the chance of a [clumsy fingered mistake](https://www.theverge.com/2017/3/2/14792442/amazon-s3-outage-cause-typo-internet-server).
+
+This is precisely what functions are for. Functions allow us to package up little bits of logic we can then easily reuse by "calling" that function by it's name later on. R packages are simply collections of functions and when we type their name and the `()` with zero or more arguments we are "calling" the function. Let's see how we can package up our standardization into a function:
+
+```{r}
+stdz <- function(x) {
+  return(x - mean(x) / sd(x))
+}
+
+stdz(permit_records$total_fees)
+```
+
+Uh-oh looks like there are some NA values in our vector. Whenever NAs show up in R our operations are typically "poisoned" by these NAs. This is because things like the mean of NA is NA etc. This is logical in that the true value is not necessarily missing, it's just not available.
+
+We can correct for this in many ways and now that our logic is in a function we only have to do this work once.
+```{r}
+# remove na's
+stdz <- function(x) {
+  return(x - mean(x, na.rm = T) / sd(x, na.rm = T))
+}
+
+stdz(permit_records$total_fees)
+
+# impute the mean
+stdz <- function(x) {
+  x = ifelse(is.na(x), mean(x, na.rm = T), x)
+  return(x - mean(x) / sd(x))
+}
+
+stdz(permit_records$total_fees)
+
+# why not both?
+stdz <- function(x, impute_mean = T) {
+  if (impute_mean) {
+    x = ifelse(is.na(x), mean(x, na.rm = T), x)
+    return(x - mean(x) / sd(x))
+  } else {
+    return(x - mean(x, na.rm = T) / sd(x, na.rm = T))
+  }
+}
+
+stdz(permit_records$total_fees, impute_mean = F)
+```
+
+We now have a concise function to standardize variables, but it's lacking some comments. Comments help both you and others (like your professors!) who would seek to understand a functions intended inputs, outputs and behaviors. Comments are preceded by the `#` symbol.
+
+```{r}
+stdz <- function(x, impute_mean = T) {
+  # standardizes numeric vectors by subtracting the mean and 
+  # dividing by the std deviation
+  # Args:
+  #   x = numeric vector
+  #   impute_mean = logical, if na impute mean? False is na.rm
+  # Returns:
+  #   numeric vector
+  if (impute_mean) {
+    x = ifelse(is.na(x), mean(x, na.rm = T), x)
+    return(x - mean(x) / sd(x))
+  } else {
+    return(x - mean(x, na.rm = T) / sd(x, na.rm = T))
+  }
+}
+
+```
+
+Another important thing to call out before we move on is naming functions. As Phil Karlton has said "There are only two hard things in Computer Science: cache invalidation and naming things." so don't worry if it takes some time to getting used to coming up with function and variable names! Names help us understand what something is and what something is supposed to do. Therefore it is of the utmost importance to have meaningful variable and function names. Things like `function1`, `functionA`, `var1` etc should never be present in your code. 
+
+## Pipes 
+Pipes allow us to daisy chain our functions together in data processing pipelines. Pipes are important tools for maintaining clean analysis scripts free of intermediate assignment for the sake of passing these intermediate variables onto other functions. We've seen the `%>%` pipe a few times already, but there are other kinds too! 
+
+First let's cover more in depth what the `%>%` pipe does. This function is from the [`magrittr` package](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html). What the function does is take the object to the left of the function and silently assign it to the variable `.` and pass this to the function to the right as the first argument. 
+
+```{r}
+permit_records %>%
+{. == permit_records}
+```
+
+This is why all of our dplyr functions, and most of the functions in the tidyverse in general, have a data frame to operate over as the first argument. 
+
+```{r}
+# top 10 owners on permits in permit_records
+permit_records %>%
+  group_by(owner) %>%
+  count %>%
+  ungroup %>%
+  arrange(desc(n)) %>%
+  slice(1:10)
+```
+
+Other types of pipes give us new functionality. The `%$%` pipe "explodes" out our variables so we can access them by name in functions that take vectors. For example to calculate the correlation between square footage and declared valuation you would do the following:
+
+```{r}
+library(magrittr)
+
+permit_records %$% cor(sq_feet, declared_valuation, use = "pairwise.complete.obs")
+```
+
+This is clearly more helpful at the end of pipelines where the source data is transformed highly.
+
+```{r}
+permit_records %>%
+  group_by(owner) %>%
+  summarise(n = length(owner),
+            mean_fees = mean(total_fees, na.rm = T)) %$%
+  cor(n, mean_fees)
+  
+```
+
+There are other pipes too like `%T>%` and `%<>%` but these are either difficult to use or not a best practice so we won't cover them here.
+
+## Tidy Data
+
+The idea of tidy data is ensuring that all of our columns are variables and all of our rows are single observations. This layout makes our data easy to model and visualize which are key ingredients in producing good analyses. Some of the data in this course is not in tidy data format. For example, the aggregate sensor data. Can you see why this is so?
+
+```{r}
+read_csv("../data/aggregatedata-final.csv")
+```
+
+It's because some categorical variables are expressed via the column names. Instead a tidy data frame would have a vector for the location, something like `city_location` which would take the values of `City1`, `City2`, etc. This would further allow us to normalize the data in the sense that we could have a single vector for humidity, lumens, TC, MCP, etc. Now, in this data set each row represents a single time step, not single observations.
+
+Fixing this data set will be a key part of this weeks homework!
+
+## Data Viz
+
+Visualizing data is a key part of generating hypotheses and validating data, models, and cleaning functions. We've already been exposed to some viz already in each of the lectures and in some of the reading. Like the pipe section we will now go more in-depth on ggplot2, the plotting package we will be using for this class. 
+
+The gg in ggplot refers to the "grammar of graphics". From our textbook: "The grammar of graphics is based on the insight that you can uniquely describe any plot as a combination of a dataset, a geom, a set of mappings, a stat, a position adjustment, a coordinate system, and a faceting scheme."
+
+Let's dive in and start making some plots layer by layer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
