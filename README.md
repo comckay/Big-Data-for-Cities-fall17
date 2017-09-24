@@ -35,7 +35,7 @@ Homework will help ensure you build the skills you need to complete your final p
 
 [Data Viz](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/ggplot2-cheatsheet-2.1.pdf)
 
-[R studio General](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rstudio-IDE-cheatsheet.pdf)
+[Rstudio General](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rstudio-IDE-cheatsheet.pdf)
 
 ### Reading
 The course textbook is (the online, free, and excellent) [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickam.
