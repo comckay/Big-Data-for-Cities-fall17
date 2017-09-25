@@ -1,0 +1,59 @@
+---
+title: "BDfC - Homework 2"
+output: html_notebook
+---
+
+In this homework we will be reinforcing the reading and lecture materials around functions, viz, pipes, and tidy data.
+
+## Tidy data 
+
+Let's start by reading in the file `aggregatedata-final`. Assign it to a variable named `sensor_data_wide`.
+
+```{r}
+
+```
+
+Now, taking what we learned in the lecture and our reading, turn this data into the tidy format. Hint, all rows should be single observations from a single node of senors (City1/2, Environ1/2). This can result in either 1 or 2 tidy data frames. You should use pipes to construct your transformation pipeline.
+
+```{r}
+```
+
+Now take the newly tidy data you just created and create 5 clean and well labelled plots which follow a common analysis theme. Clearly document your thought process as plain text around the code chunks. 
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+Now read in `Permits.Records.2017`, do some exploratory summarization with dplyr, then create another 5 plots following a common theme. Document your thought process throughout. Please read the documentation for this file to ensure your analysis is true to the data.
+```{r}
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
