@@ -3,14 +3,6 @@ title: "BDfC - Lecture 4"
 output: html_notebook
 ---
 
-```{r}
-grades <- c(25, 25, 35, 60, 60, 60, 60, 65, 80, 85, 90, 90, 90, 90, 90, 90, 100)
-
-sqrt(sd(grades))
-
-summary(grades)
-```
-
 ## Refresher
 
 ### loading libraries
@@ -225,14 +217,6 @@ service_requests$open_dt[service_requests$open_dt > lubridate::ymd("2017-09-01")
 ```
 
 These indicies and a notion of distinct slots for each piece of data in a container allows us to begin talking about iteration or a means to iteratively apply an operation accross a container like a vector or even an entire data frame.
-
-## String manipulation
-
-
-```{r}
-
-```
-
 
 # NOT GOING OVER, NO NEED TO READ ITERATION CHAPTER
 
