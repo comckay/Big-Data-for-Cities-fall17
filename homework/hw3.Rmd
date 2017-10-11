@@ -1,0 +1,11 @@
+---
+title: "BDfC - HW 3"
+output: html_notebook
+---
+
+The mayor is having a community meeting in Roslindale tonight. Using the last 6 months of call center data from the [311 dataset](https://data.boston.gov/dataset/311-service-requests) create a report that 1) details what constituents in this neighborhood call about, 2) helps the mayor understand how Roslindale differs from the rest of the city, and  3) what if any major events or recent trends have been having a measurable impact on city operations in the neighborhood. Your report should contain no less than 4 clean, well labeled, and legible plots as well as 2 summary data sets, and a clear description written in terms a busy mayor could read and understand quickly. 
+
+
+```{r}
+library(tidyverse)
+```

@@ -1,0 +1,309 @@
+---
+title: "BDfC - Lecture 4"
+output: html_notebook
+---
+
+```{r}
+grades <- c(25, 25, 35, 60, 60, 60, 60, 65, 80, 85, 90, 90, 90, 90, 90, 90, 100)
+
+sqrt(sd(grades))
+
+summary(grades)
+```
+
+## Refresher
+
+### loading libraries
+```{r}
+# only needs to be done once, has dplyr, ggplot, %>%, and readr in it!
+library(tidyverse)
+```
+
+### Assignment
+```{r}
+n_cats <- 10
+paste("I have", n_cats, "cats")
+```
+
+### Pipes
+```{r}
+mayors_hotline <- read_csv("../data/311.csv")
+
+mayors_hotline %>%
+  group_by(neighborhood) %>%
+  count
+
+# SAME AS
+
+grouped_mayors <- group_by(mayors_hotline, neighborhood)
+count(grouped_mayors)
+
+mayors_hotline %>%
+{print(.)} %>%
+  group_by(neighborhood) %>%
+  {print(.)} %>%
+  count
+```
+
+```{r}
+# prints but **does not assign**
+mayors_hotline %>%
+  group_by(neighborhood) %>%
+  count
+
+# notice the <- 
+calls_by_nhood <- mayors_hotline %>%
+  group_by(neighborhood) %>%
+  count
+
+calls_by_nhood  
+```
+
+### Control flow and logic
+
+```{r}
+n_cats > 10
+
+x <- 5:15
+
+n_cats > x
+```
+
+```{r}
+if (n_cats > 10) {
+  print("...You have a problem")
+} else {
+  print("Get more cats!")
+}
+
+ifelse(n_cats > 10, "...You have a problem", "Get more cats!")
+```
+
+
+### "Clean" plots
+
+Clean plots are very important and you will be graded as such! If noone can read your plot, it's not going to be very helpful. Let's look at some ways to fix.
+
+```{r}
+calls_by_nhood
+
+ggplot(data = calls_by_nhood, mapping = aes(x = neighborhood, y = n)) +
+  geom_bar(stat = "identity")
+```
+
+looks messy! Some problems: no title, can't read x axis, bad x/y labels. Nice to have: reorder cols. 
+
+```{r}
+# one way to deal with x axis overlap, if it's not too severe
+ggplot(data = calls_by_nhood, mapping = aes(x = neighborhood, y = n)) +
+  geom_bar(stat = "identity") +
+  # flip x and y
+  coord_flip()
+```
+
+Anoter way to fix is by rotating the labels
+
+```{r}
+ggplot(data = calls_by_nhood, mapping = aes(x = neighborhood, y = n)) +
+  geom_bar(stat = "identity") +
+  # I personally have to look up this syntax every single time
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+```
+
+adding/fixing labels is simple, too.
+
+```{r}
+# one way to deal with x axis overlap, if it's not too severe
+ggplot(data = calls_by_nhood, mapping = aes(x = neighborhood, y = n)) +
+  geom_bar(stat = "identity") +
+  # flip x and y
+  coord_flip() +
+  # x label
+  xlab("") +
+  ylab("Count of Cases Created")
+```
+
+Same with titles!
+```{r}
+ggplot(data = calls_by_nhood, mapping = aes(x = neighborhood, y = n)) +
+  geom_bar(stat = "identity") +
+  # flip x and y
+  coord_flip() +
+  # x label
+  xlab("") +
+  ylab("Count of Cases Created") +
+  ggtitle("Count of 311 Cases Created by Neighborhood")
+```
+
+Reordering has kind of a wacky syntax (arrange does not work!), but it's simple once you see it.
+
+```{r}
+ggplot(data = calls_by_nhood, mapping = aes(x = reorder(neighborhood, n), y = n)) +
+  geom_bar(stat = "identity") +
+  # flip x and y
+  coord_flip() +
+  # x label
+  xlab("") +
+  ylab("Count of Cases Created") +
+  ggtitle("Count of 311 Cases Created by Neighborhood")
+```
+
+We can add themes to further style:
+```{r}
+base_plot <- ggplot(data = calls_by_nhood, mapping = aes(x = reorder(neighborhood, n), y = n)) +
+  geom_point() +
+  # flip x and y
+  coord_flip() +
+  # x label
+  xlab("") +
+  ylab("Count of Cases Created") +
+  ggtitle("Count of 311 Cases Created by Neighborhood")
+
+base_plot
+
+base_plot +
+  theme_bw()
+
+base_plot +
+  theme_classic()
+
+base_plot +
+  theme_minimal()
+
+clean_plot <- base_plot +
+# taken from https://ase.tufts.edu/bugs/guide/assets/R%20Graphics%20Cookbook.pdf USE THIS BOOK!
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+library(plotly)
+
+ggplotly(clean_plot)
+```
+
+
+## Vectors
+
+Vectors in R are the base of everything we will work with. Vectors are containers for one or more than piece of data of the type NA, chracter, numeric, or factor.
+
+We can make vectors with `c()`
+```{r}
+c("this", "is", "a", "character", "vector")
+c(1:10)
+
+x <- 1
+
+is.vector(x)
+```
+
+Vectors have a notion of length and "indicies" or numbers that enumerate upwards for each "slot" in a vector. In R our indices start with 1.
+
+```{r}
+x <- c(10:25)
+
+length(x)
+
+# this is called subsetting a vector
+x[1]
+
+
+x[c(1,10)]
+```
+
+We subset by either supplying numeric indicies or logical vectors
+
+```{r}
+library(tidyverse)
+
+x[15]
+
+x[x >= 20]
+
+service_requests <- read_csv("../data/311.csv")
+
+service_requests$open_dt[service_requests$open_dt > lubridate::ymd("2017-09-01")]
+```
+
+These indicies and a notion of distinct slots for each piece of data in a container allows us to begin talking about iteration or a means to iteratively apply an operation accross a container like a vector or even an entire data frame.
+
+## String manipulation
+
+
+```{r}
+
+```
+
+
+# NOT GOING OVER, NO NEED TO READ ITERATION CHAPTER
+
+## Iteration
+
+Iteration allows us to iteratively apply functions accross containers such as vectors or dataframes. You have seen some of this already with `group_by` amd `summarise` where functions are applied accross each group. Iteration helps with the DRY principle we talked about last week. By putting our repeated logic in functions and iterating across our containers applying those functions when a condition is met allows us to reduce a large amount of duplicate code.
+```{r}
+# turn all character data to lowercase only
+service_requests %>%
+  map_if(is.character, tolower) %>%
+  data.frame()
+```
+
+map mostly helps us with applying functions over collections of data frames. For this we will need a list of data frames
+
+```{r}
+nhood_list <- service_requests %>%
+  split(.$neighborhood)
+
+nhood_list
+```
+
+
+```{r}
+service_requests %>%
+  split(.$neighborhood) %>%
+  map(summary)
+```
+
+
+```{r}
+geo_plot  <- function(df, lat, long, color_by, plot_dir, save_plot=TRUE) {
+  # get nhood 
+  nhood = unique(df$neighborhood)
+  
+  plt = ggplot(df, aes_string(x = long, y = lat, color = color_by)) +
+    geom_point() +
+    ggtitle(nhood)
+  return(plt)
+}
+
+
+paste0("this", "is", )
+table(service_requests$Department)
+
+service_requests %>%
+  split(.$neighborhood) %>%
+  map(filter, CASE_STATUS == "Closed") %>%
+  map(geo_plot, "Latitude", "Longitude", "SUBJECT", "../plots/")
+
+service_requests %>%
+  split(.$neighborhood) %>%
+  map(filter, CASE_STATUS == "Closed") %>% 
+  map(filter, Department == "BWSC") %>%
+  map(geo_plot, "Latitude", "Longitude", "REASON")
+
+# save to disk
+geo_plot  <- function(df, lat, long, color_by, plot_dir, save_plot=TRUE) {
+  # get nhood 
+  nhood = unique(df$neighborhood)
+  
+  plt = ggplot(df, aes_string(x = long, y = lat, color = color_by)) +
+    geom_point() +
+    ggtitle(nhood)
+  if (save_plot) {
+    ggsave(plot = plt, filename = paste0(plot_dir, nhood, ".jpg", collapse = ''), width = 9)
+  }
+  return(plt)
+}
+
+```
+
+
+
