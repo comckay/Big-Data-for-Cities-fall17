@@ -1,0 +1,120 @@
+---
+title: "BDfC - Homework 2"
+output: html_notebook
+---
+
+In this homework we will be reinforcing the reading and lecture materials around functions, viz, pipes, and tidy data.
+
+## Tidy data 
+
+Let's start by reading in the file `aggregatedata-final`. Assign it to a variable named `sensor_data_wide`.
+
+```{r}
+library(tidyverse)
+library(stringr)
+
+sensor_data_wide <- read_csv("../data/aggregatedata-final.csv")
+```
+
+Now, taking what we learned in the lecture and our reading, turn this data into the tidy format. Hint, all rows should be single observations from a single node of senors (City1/2, Environ1/2). This can result in either 1 or 2 tidy data frames. You should use pipes to construct your transformation pipeline.
+
+```{r}
+sensor_data_wide
+
+sensor_data_wide %>% select(day:minute)
+ 
+city1_sensor <- sensor_data_wide %>%
+  {print(.)} %>%
+  select(day:minute, contains("City1")) %>%
+  {print(.)} %>%
+  filter(!is.na(City1LUM_value)) %>%
+  {print(.)} %>%
+  mutate(sensor_site = "City1")
+
+names(city1_sensor) <- str_replace(names(city1_sensor), "City1", "")
+
+city2_sensor <- sensor_data_wide %>%
+  select(day:minute, contains("City2")) %>%
+  filter(!is.na(City2LUM_value)) %>%
+  mutate(sensor_site = "City2")
+
+names(city2_sensor) <- str_replace(names(city2_sensor), "City2", "")
+
+Envi1_sensor <- sensor_data_wide %>%
+  select(day:minute, contains("Envi1")) %>%
+  filter(!is.na(Envi1CO_value)) %>%
+  mutate(sensor_site = "Envi1")
+
+names(Envi1_sensor) <- str_replace(names(Envi1_sensor), "Envi1", "")
+
+Envi2_sensor <- sensor_data_wide %>%
+  select(day:minute, contains("Envi2")) %>%
+  filter(!is.na(Envi2CO_value)) %>%
+  mutate(sensor_site = "Envi2")
+
+names(Envi2_sensor) <- str_replace(names(Envi2_sensor), "Envi2", "")
+
+dplyr::rename(city1_sensor, HOUR = hour)
+
+bind_rows(city1_sensor, city2_sensor)
+  
+  bind_rows(Envi1_sensor, Envi2_sensor)
+  filter(sensor_site == "Envi2")
+
+
+```
+
+```{r}
+city1_sensor <- sensor_data_wide %>%
+  {print(.)} %>%
+  select(day:minute, contains("City1")) %>%
+  {print(.)} %>%
+  filter(!is.na(City1LUM_value)) %>%
+  {print(.)} %>%
+  mutate(sensor_site = "City1")
+
+names(city1_sensor) <- str_replace(names(city1_sensor), "City1", "")
+
+city1_sensor
+```
+
+
+Now take the newly tidy data you just created and create 5 clean and well labelled plots which follow a common analysis theme. Clearly document your thought process as plain text around the code chunks. 
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+Now read in `Permits.Records.2017`, do some exploratory summarization with dplyr, then create another 5 plots following a common theme. Document your thought process throughout. Please read the documentation for this file to ensure your analysis is true to the data.
+```{r}
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
