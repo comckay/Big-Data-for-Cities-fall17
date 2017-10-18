@@ -1,0 +1,108 @@
+---
+title: "BDfC - Lecture 4"
+output: html_notebook
+---
+
+## String Manipulation
+
+We've covered character vectors thus far, individual entries within a character vector are often and commonly referred to as "strings". In order to clean a lot of the data we will be working with we need to dive a bit into string manipulation.
+
+```{r}
+library(tidyverse)
+library(stringr)
+library(lubridate)
+
+hotline_data <- read_csv("../data/311.csv")
+biz_license <- read_csv("../data/BusinessLicenses_raw.csv")
+
+head(hotline_data)
+```
+
+The two kinds of string manipulation we will want to do as part of this course fall into detection of strings and substituting subsections of strings.
+
+Let's cover substitution/replacement first.
+```{r}
+table(hotline_data$neighborhood)
+
+hotline_data <- hotline_data %>%
+  mutate(neighborhood = str_replace(string = neighborhood, pattern = " / Brighton", "")) # removal is the same as replacing with an empty string
+
+table(hotline_data$neighborhood)
+```
+
+Now let's cover detection, this gives us TRUE/FALSE when a string contains something that matches a pattern.
+
+```{r}
+table(biz_license$CITY)
+
+biz_license %>%
+  select(CITY) %>%
+  mutate(has_hill_in_nhood = str_detect(string = CITY, pattern = "Hill")) %>%
+  filter(has_hill_in_nhood)
+
+# we can use a thing called regular expressions to make this more felxible
+city_with_hill <- biz_license %>%
+  select(CITY) %>%
+  mutate(has_hill_in_nhood = str_detect(string = CITY, pattern = "(Hill|hill|HILL)")) %>%
+  filter(has_hill_in_nhood)
+
+table(city_with_hill$CITY)
+```
+
+## Joins and stacking
+
+Combining data is one of the most important things you can do to be more effective in your analyses. this allows disparate data to come together and highlight things a single dataset never could.
+
+First let's cover combining two small datasets row-wise where they have matching columns
+
+```{r}
+allston <- hotline_data %>%
+  filter(neighborhood == "Allston")
+
+allston$is_allston <- TRUE
+
+# combines cols intelligently, even reordering. Columns that don't exists in one are added and set to NA in places where there is no data available.
+bind_rows(hotline_data, allston)
+```
+
+```{r}
+#joins work on the level of matching keyed values between data, ie when two datasets share a column (called a key in data terms)
+licenses_by_day <- biz_license %>%
+  filter(str_detect(tolower(CITY), "allston")) %>%
+  mutate(neighborhood = "Allston",
+         issue_date = lubridate::dmy_hm(ISSDTTM)) %>%
+  group_by(day = lubridate::date(issue_date)) %>%
+  count %>%
+  rename(licenses_issued = n)
+
+calls_by_day <- hotline_data %>%
+  filter(str_detect(tolower(neighborhood), "allston")) %>%
+  mutate(neighborhood = "Allston",
+         day = lubridate::date(open_dt)) %>%
+  group_by(day) %>%
+  count %>%
+  rename(n_calls = n)
+
+calls_and_licenses <- inner_join(calls_by_day, licenses_by_day, by = "day")
+
+ggplot(calls_and_licenses, aes(x = n_calls, y = licenses_issued)) +
+  geom_point()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
