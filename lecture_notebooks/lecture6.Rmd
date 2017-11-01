@@ -1,0 +1,109 @@
+---
+title: "Lecture 4 - Mapping with R"
+output: html_notebook
+---
+
+This week we will begin to explore a number of new packages that allow us to map and access mappable data in R! This will be part of a series of lectures on mapping tools as we can't hope to cover everything in one pass. First it should be noted that maps are **NOT** required as part of your final but will come into play in one or two homework assignments. 
+
+In order to get started we need to install the requisite packages but unlike our earlier packages these will rely on things _outside_ of R in order to work, such as GDAL. Here is how I was able to install the packages on my laptop, taken from [here](https://www.karambelkar.info/2016/10/gdal-2-on-mac-with-homebrew/) using a package management tool called [`brew`](https://brew.sh/):
+
+**YOU MUST HAVE BREW INSTALLED FOR THE FOLLOWING BLOCK TO WORK!**
+
+```{bash}
+brew unlink gdal
+brew tap osgeo/osgeo4mac && brew tap --repair
+brew install jasper netcdf # gdal dependencies
+brew install gdal2 --with-armadillo \
+--with-complete --with-libkml --with-unsupported
+brew link --force gdal2
+```
+
+
+```{r}
+install.packages("sf")
+install.packages("tigris")
+install.packages("tidycensus")
+install.packages("viridis")
+install.packages("ggsf")
+install.packages("ggplot2")
+```
+
+```{r}
+library(tigris)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(viridis) # colors and stuff
+library(ggplot2)
+
+options(tigris_class = "sf")
+```
+
+Go get a census api key [here](http://api.census.gov/data/key_signup.html)
+
+```{r}
+census_api_key("8fb6343a8789f91e7dd2ba8688d1f3018701ad95")
+```
+to see fips codes we use the `fips_codes` dataset
+```{r}
+fips_codes
+```
+
+```{r}
+sf1 <- tidycensus::load_variables(2010, dataset = "sf1")
+View(sf1)
+```
+
+```{r}
+ma_pop <- get_decennial("tract", variables = "H0100001", year = 2010, state = "MA", geometry = T)
+
+ma_pop %>%
+  ggplot(aes(fill = value, color = value)) + 
+  geom_sf() + 
+#  coord_sf(crs = 26911) + 
+  scale_fill_viridis(option = "magma") + 
+  scale_color_viridis(option = "magma")
+```
+
+```{r}
+ma <- get_acs(geography = "county", variables = "B19013_001", state = "MA")
+
+ma
+
+ma %>%
+  mutate(NAME = gsub(" County, Massachusetts", "", NAME)) %>%
+  ggplot(aes(x = estimate, y = reorder(NAME, estimate))) +
+  geom_errorbarh(aes(xmin = estimate - moe, xmax = estimate + moe)) +
+  geom_point(color = "red", size = 3) +
+  labs(title = "Household income by county in Mass.",
+       subtitle = "2011-2015 American Community Survey",
+       y = "",
+       x = "ACS estimate (bars represent margin of error)")
+```
+
+```{r}
+suffolk_income <- get_acs(state = "MA", county = "Suffolk", geography = "tract", 
+                  variables = "B19013_001", geometry = TRUE)
+
+suffolk_income %>%
+  ggplot(aes(fill = estimate, color = estimate)) + 
+  geom_sf() + 
+#  coord_sf(crs = 26911) + 
+  scale_fill_viridis(option = "magma") + 
+  scale_color_viridis(option = "magma")
+```
+
+We can also plot roads and other important geographic features with the `tigris` package
+```{r}
+bos_roads <- roads(state = "MA", county = "Suffolk")
+
+ggplot(bos_roads) +
+  geom_sf()
+```
+
+```{r}
+bos_water <- area_water(state = "MA", county = "Suffolk")
+
+ggplot(bos_water) +
+  geom_sf()
+```
