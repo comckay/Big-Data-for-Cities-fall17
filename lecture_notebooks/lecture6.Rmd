@@ -24,7 +24,6 @@ install.packages("sf")
 install.packages("tigris")
 install.packages("tidycensus")
 install.packages("viridis")
-install.packages("ggsf")
 install.packages("ggplot2")
 ```
 
@@ -50,7 +49,7 @@ fips_codes
 ```
 
 ```{r}
-sf1 <- tidycensus::load_variables(2010, dataset = "sf1")
+sf1 <- tidycensus::load_variables(2010, dataset = "acs5")
 View(sf1)
 ```
 
@@ -85,16 +84,23 @@ ma %>%
 suffolk_income <- get_acs(state = "MA", county = "Suffolk", geography = "tract", 
                   variables = "B19013_001", geometry = TRUE)
 
-suffolk_income %>%
+plt <- suffolk_income %>%
   ggplot(aes(fill = estimate, color = estimate)) + 
   geom_sf() + 
 #  coord_sf(crs = 26911) + 
   scale_fill_viridis(option = "magma") + 
   scale_color_viridis(option = "magma")
+
+plotly::ggplotly(plt)
 ```
 
 We can also plot roads and other important geographic features with the `tigris` package
 ```{r}
+ma_schools <- school_districts(state = "MA")
+
+ggplot(ma_schools) +
+  geom_sf()
+
 bos_roads <- roads(state = "MA", county = "Suffolk")
 
 ggplot(bos_roads) +
@@ -104,6 +110,19 @@ ggplot(bos_roads) +
 ```{r}
 bos_water <- area_water(state = "MA", county = "Suffolk")
 
+bos_nhoods <- sf::read_sf("~/Downloads/Boston_Neighborhoods.geojson")
+
 ggplot(bos_water) +
   geom_sf()
+```
+
+
+```{r}
+hotline <- read_csv("../data/311.csv")
+
+plt <- ggplot(bos_nhoods) +
+  geom_sf() +
+  geom_point(data = hotline, aes(x = Longitude, y = Latitude, color = SUBJECT))
+
+plotly::ggplotly(plt)
 ```
