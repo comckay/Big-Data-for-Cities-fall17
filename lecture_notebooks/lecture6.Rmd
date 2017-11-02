@@ -41,7 +41,7 @@ options(tigris_class = "sf")
 Go get a census api key [here](http://api.census.gov/data/key_signup.html)
 
 ```{r}
-census_api_key("8fb6343a8789f91e7dd2ba8688d1f3018701ad95")
+census_api_key("")
 ```
 to see fips codes we use the `fips_codes` dataset
 ```{r}
@@ -109,20 +109,35 @@ ggplot(bos_roads) +
 
 ```{r}
 bos_water <- area_water(state = "MA", county = "Suffolk")
-
-bos_nhoods <- sf::read_sf("~/Downloads/Boston_Neighborhoods.geojson")
-
-ggplot(bos_water) +
+on
   geom_sf()
 ```
 
 
 ```{r}
+bos_nhoods <- sf::read_sf("~/Downloads/Boston_Neighborhoods.geojson")
 hotline <- read_csv("../data/311.csv")
 
-plt <- ggplot(bos_nhoods) +
+table(hotline$SUBJECT)
+
+rats <-  hotline %>% filter(SUBJECT == "Animal Control")
+
+
+ggplot(bos_nhoods) +
   geom_sf() +
-  geom_point(data = hotline, aes(x = Longitude, y = Latitude, color = SUBJECT))
+  geom_count(data = rats, aes(x = Longitude, y = Latitude, color = TYPE))
+
+
 
 plotly::ggplotly(plt)
+```
+
+
+
+```{r}
+
+x <- "a string with ??? question ?"
+
+stringr::str_replace_all(x, "\\?", replacement = "-")
+
 ```
