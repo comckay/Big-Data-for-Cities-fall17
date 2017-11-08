@@ -1,0 +1,145 @@
+---
+title: "BDfC - Stats"
+output: html_notebook
+---
+
+# Statistics
+This week we will be learning some simple statistics. It should be noted that these are **not required** for your final, but these can very much help any analysis and without these methods it's often impossible to truly explain the relationship between things in your data.
+
+## Covariance
+We're starting simple with covariance, which is the basis for some of our later methods. Covariance can be thought of as the mean of variances between two vectors or distributions. **NOTE** this formulation obviously only works with numeric data:
+
+$$
+cov(X,Y) = E[(X - \mu_X)(Y-\mu_Y)]
+$$
+
+where $\mu_x$ is the mean of x, $X$ is our vector of observations for the variable $x$ and $E[]$ is the expected value operator or the mean.
+
+To calculate covariance in R we simply use the `cov` function:
+
+```{r}
+library(tidyverse)
+
+pad_long<- read_tsv("../data/PADLong.CBG.2017.tsv")
+
+cov(pad_long$CrashPercChangeAV, pad_long$GrowthPercChangeAV)
+```
+
+## Correlation
+
+Correlation is mostly known intuitively to all of us. It is very important to impress that **correlation does not mean there is a causitive relationship present**, see [here](http://www.tylervigen.com/spurious-correlations). Correlation is a measure of _dependence_ between two variables and be either negative or positive. Correlation is calculated with covariance and [standard deviations](https://en.wikipedia.org/wiki/Standard_deviation) like so:
+$$
+corr(X, Y) = \frac{cov(X, Y)}{\sigma_X \sigma_Y}
+$$
+
+Let's take a look visually at what varying levels of correlation look like:
+
+![](../figures/correlation-coefficient-tutorial-simulation.gif)
+
+Correlation is symmetric meaning that $corr(X,Y)$ is exactly equal to $corr(Y, X)$
+
+In R this is simple to calculate using `cor`:
+```{r}
+cor(pad_long$CrashPercChangeAV, pad_long$GrowthPercChangeAV)
+```
+
+```{r}
+cor(pad_long$CrashPercChangeAV, pad_long$GrowthPercChangeAV) == cor(pad_long$GrowthPercChangeAV, pad_long$CrashPercChangeAV)
+```
+
+## Linear Regression
+
+Linear regression takes this notion of dependence a step further in that it seeks to fit a line (or linear hyper-plane in many dimensions) to our data and give us statistics about the properties of that line of best fit. The relationship is described as such:
+
+$$
+Y = XW^T+\epsilon
+$$
+
+Where $Y$ is our vector of outcomes, $X$ is our matrix of inputs, $W^T$ is our weight matrix (a matrix of coefficients for each vector in $X$) and $\epsilon$ is some irreducible error that is normally distributed (Gaussian!) $\epsilon \sim N(\mu, \sigma)$ which is a strong assumption for this model.
+
+The line which bests fits the data is typically the one which minimizes the [residual sum of squares](https://en.wikipedia.org/wiki/Residual_sum_of_squares):
+
+$$
+RSS = \sum^n_i (y_i - \hat{y})^2
+$$
+
+where $\hat{y}$ is the value predicted for y given an some input. In other words $y_i-\hat{y}$ is our error, a measure of how "far off" we were with our prediction. We then square this error to place a higher penalty on predictions that are very far off (outliers).
+
+In R fitting linear regression is just as simplistic as the methods we have seen previously, however unlike those methods the output of the function has a ton of information which requires some analysis. The output is also not a `data.frame` which is where the `broom` package comes in handy.
+
+The `lm` function allows us to fit our model to some data. This function has some special syntax: `lm(dependent_var ~ independent_var, data = df)` where the tilde `~` separates our data we are predicting for from the data we will use to make those predictions.  
+
+```{r}
+library(broom)
+lm(GrowthPercChangeAV ~ CrashPercChangeAV, data = pad_long)
+```
+
+Huh? This weird output is because lm simply creates an object of class `lm`. We need to call `summary` on this object to see the stats we care about.
+
+```{r}
+perc_change_lm <- lm(GrowthPercChangeAV ~ CrashPercChangeAV, data = pad_long)
+lm_summary <- summary(perc_change_lm)
+
+lm_summary
+
+broom::tidy(lm_summary)
+broom::tidy(perc_change_lm)
+```
+
+Looks like there is a significant negative relationship but a pretty weak R-squared and some huge values for our residuals (look at the max) which indicates we have some outliers:
+```{r}
+ggplot(pad_long, aes(x = CrashPercChangeAV, y = GrowthPercChangeAV)) +
+  geom_point()
+```
+
+Let's deal with theses and retry:
+```{r}
+pad_long_trimmed <- pad_long %>%
+  select(GrowthPercChangeAV, CrashPercChangeAV) %>%
+  filter(GrowthPercChangeAV < 500)
+
+ggplot(pad_long_trimmed, aes(x=CrashPercChangeAV, y=GrowthPercChangeAV))+
+  geom_point()
+
+perc_change_trimmed_lm <- lm(GrowthPercChangeAV ~ CrashPercChangeAV, data = pad_long_trimmed)
+summary(perc_change_trimmed_lm)
+```
+
+We see that our estimates have changed and our R squared greatly improved, we're on our way to being published!
+
+## ANOVA
+
+ANOVA stands for "Analysis of Variance" which generally allows us to test inner-group or factor difference in means when those groups make up a larger whole. For example, testing the difference in means between response times for each neighborhood in a city...
+
+```{r}
+library(lubridate)
+hotline <- read_csv("../data/311.csv")
+
+nhood_sec_to_close <- hotline %>%
+  filter(CASE_STATUS == "Closed",
+         Source != "Employee Generated") %>% 
+  select(neighborhood, contains("_dt")) %>%
+  mutate(sec_to_close = closed_dt - open_dt,
+         stc_numeric = as.numeric(sec_to_close))
+```
+
+
+```{r}
+ggplot(nhood_sec_to_close, aes(x = stc_numeric)) +
+  geom_histogram(bins = 1000)
+```
+
+Let's trim some of these outliers
+```{r}
+trimmed_sec_to_close <- nhood_sec_to_close %>%
+  filter(sec_to_close < 129600) # 3 months
+```
+
+```{r}
+ggplot(trimmed_sec_to_close, aes(x = stc_numeric)) +
+  geom_histogram(bins = 1000)
+```
+
+```{r}
+summary(aov(stc_numeric ~ neighborhood, trimmed_sec_to_close))
+```
