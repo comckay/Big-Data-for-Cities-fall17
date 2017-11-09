@@ -3,6 +3,6 @@ title: "Homework"
 output: html_notebook
 ---
 
-The Cities GIS team has asked you to help them with a year end report for the City Council. Their ask of you: "Create a map-based story using 311 data and other sources to illustrate how Boston's needs and environment changes over the years, going in-depth within at least two neighborhoods."
+The Cities GIS team has asked you to help them with a year end report for the City Council. Their ask of you: "Create a map-based story using 311 data and other sources to illustrate how Boston's needs and environment changes over the seasons/years, going in-depth within at least two neighborhoods."
 
 Your homework should be returned as both an `.Rmd` file and the `.html` derivative. Your homework **must** leverage the `sf` package to handle spatial data and geometries. Your homework must have at least 6 clean, compelling plots with half of them being maps which follow a common, focused analysis theme. 
